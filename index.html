@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六年制語文 TCG - 最高中控台 V2.1</title>
+    <title>六年制語文 TCG - 最高中控台 V2.2</title>
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { color: #00ffcc; border-bottom: 2px solid #333; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        h2 { color: #f39c12; border-bottom: 1px dashed #555; padding-bottom: 5px; margin-top: 40px; }
         
         select.class-filter { background: #2a2a2a; color: #00ffcc; border: 1px solid #00ffcc; padding: 5px 10px; font-size: 16px; border-radius: 4px; cursor: pointer; }
         
@@ -33,18 +34,19 @@
         .btn-score-down { background: #e74c3c; color: #fff; } 
         .btn-hw { background: #9b59b6; color: #fff; } 
         .btn-leave { background: #95a5a6; color: #121212; } 
-        .btn-delete { background: #555; color: #ff6b6b; border: 1px solid #ff6b6b; } /* 銷毀按鈕 */
+        .btn-delete { background: #555; color: #ff6b6b; border: 1px solid #ff6b6b; } 
         .btn-delete:hover { background: #ff6b6b; color: #fff; }
         
         .stat-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: #333; margin-left: 5px; }
         .warn-text { color: #e74c3c; }
+        .version-tag { color: #9b59b6; font-size: 12px; border: 1px solid #9b59b6; padding: 2px 4px; border-radius: 3px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>
-            天工督軍 - 最高中控台 
+            天工督軍 - 部隊作戰面板 
             <select id="viewClassFilter" class="class-filter">
                 <option value="ALL">顯示全部兵力</option>
                 <option value="A班">僅顯示 A班</option>
@@ -57,18 +59,12 @@
         <div class="grid-panel">
             <div class="form-box" style="border-color: #f39c12;">
                 <h3>閃電擴軍 (從 Excel 複製貼上)</h3>
-                <select id="batchClassSelect" style="width: 100%;">
-                    <option value="A班">目標編制：A班</option>
-                    <option value="B班">目標編制：B班</option>
-                    <option value="C班">目標編制：C班</option>
-                </select>
-                <textarea id="batchData" placeholder="格式需為：學號 [Tab] 姓名 (無須包含班級)&#10;S001 諸葛亮"></textarea>
+                <select id="batchClassSelect" style="width: 100%;"><option value="A班">目標編制：A班</option><option value="B班">目標編制：B班</option><option value="C班">目標編制：C班</option></select>
+                <textarea id="batchData" placeholder="格式需為：學號 [Tab] 姓名&#10;S001 諸葛亮"></textarea>
                 <button id="batchBtn" style="background: #f39c12; color: #fff;">批次注入指定班級</button>
             </div>
-
             <div class="form-box">
                 <h3>單兵特招 / 資料修正</h3>
-                <p style="font-size: 12px; color: #aaa; margin-top: 0;">※ 若要修改現有學生姓名或班級，請輸入「相同學號」後重新建檔即可覆蓋。</p>
                 <div style="display:flex; gap:10px;">
                     <select id="stuClass" style="width:30%; margin:0;"><option value="A班">A班</option><option value="B班">B班</option><option value="C班">C班</option></select>
                     <input type="text" id="stuId" placeholder="學號" style="width:30%; margin:0;" />
@@ -80,19 +76,36 @@
 
         <table>
             <thead>
-                <tr>
-                    <th>學號</th><th>姓名</th><th>班級</th>
-                    <th>積分</th><th>金幣</th>
-                    <th>行政紀錄</th>
-                    <th>戰術決策面板</th>
-                </tr>
+                <tr><th>學號</th><th>姓名</th><th>班級</th><th>積分</th><th>金幣</th><th>行政紀錄</th><th>戰術決策面板</th></tr>
             </thead>
             <tbody id="studentTableBody"></tbody>
+        </table>
+
+        <h2>兵器庫 - 卡牌原型控制台</h2>
+        <div class="form-box" style="border-color: #9b59b6;">
+            <h3>鑄造 / 修正卡牌</h3>
+            <p style="font-size: 12px; color: #aaa; margin-top: 0;">※ 輸入已存在的「卡牌編號」即可覆蓋修改其名稱或版本。未來系統支援自行輸入新版本名稱。</p>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="cardId" placeholder="卡牌編號 (例: V1-01)" style="width:25%; margin:0;" />
+                <input type="text" id="cardName" placeholder="卡牌名稱 (例: 基礎標點卡)" style="width:45%; margin:0;" />
+                <input type="text" id="cardVersion" list="versionOptions" placeholder="選擇或輸入版本" style="width:30%; margin:0;" />
+                <datalist id="versionOptions">
+                    <option value="原始版1.0"></option>
+                    <option value="擴張包1.5"></option>
+                </datalist>
+            </div>
+            <button id="addCardBtn" style="background: #9b59b6; color: #fff; margin-top: 10px;">鑄造入庫 / 覆蓋更新</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr><th>卡牌編號</th><th>卡牌名稱</th><th>所屬版本</th><th>兵器庫管理</th></tr>
+            </thead>
+            <tbody id="cardTableBody"></tbody>
         </table>
     </div>
 
     <script type="module">
-        // ⚠️ 新增了 deleteDoc 核心模組
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -109,18 +122,18 @@
         };
         // ==========================================
      
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        
+        // --- 模組 A：部隊管理 (與 V2.1 相同) ---
         const tableBody = document.getElementById('studentTableBody');
         const viewClassFilter = document.getElementById('viewClassFilter');
-        
         let allStudentsData = [];
 
         onSnapshot(collection(db, "students"), (snapshot) => {
             allStudentsData = [];
-            snapshot.forEach((doc) => {
-                allStudentsData.push({ id: doc.id, ...doc.data() });
-            });
+            snapshot.forEach((doc) => { allStudentsData.push({ id: doc.id, ...doc.data() }); });
             renderTable(); 
         });
 
@@ -129,13 +142,7 @@
         function renderTable() {
             const currentFilter = viewClassFilter.value;
             tableBody.innerHTML = '';
-            
-            const filteredData = allStudentsData.filter(student => {
-                if (currentFilter === "ALL") return true;
-                if (currentFilter === "" && !student.class) return true; // 抓出沒有班級的資料
-                return student.class === currentFilter;
-            });
-
+            const filteredData = allStudentsData.filter(s => currentFilter === "ALL" || (currentFilter === "" && !s.class) || s.class === currentFilter);
             filteredData.sort((a, b) => {
                 if(a.class === b.class) return a.id.localeCompare(b.id);
                 return (a.class || "").localeCompare(b.class || "");
@@ -144,25 +151,20 @@
             filteredData.forEach((data) => {
                 tableBody.innerHTML += `
                     <tr>
-                        <td><strong>${data.id}</strong></td><td>${data.name || ''}</td>
-                        <td style="color:#aaa;">${data.class || '未編編'}</td>
-                        <td style="color:#3498db; font-weight:bold; font-size:16px;">${data.score || 0}</td>
-                        <td style="color:#f1c40f; font-weight:bold;">${data.gold || 0}</td>
-                        <td>
-                            <div class="stat-badge ${data.missingHw > 0 ? 'warn-text' : ''}">欠交: ${data.missingHw || 0}</div>
-                            <div class="stat-badge">請假: ${data.leaveDays || 0}</div>
-                        </td>
+                        <td><strong>${data.id}</strong></td><td>${data.name || ''}</td><td style="color:#aaa;">${data.class || '未編編'}</td>
+                        <td style="color:#3498db; font-weight:bold; font-size:16px;">${data.score || 0}</td><td style="color:#f1c40f; font-weight:bold;">${data.gold || 0}</td>
+                        <td><div class="stat-badge ${data.missingHw > 0 ? 'warn-text' : ''}">欠交: ${data.missingHw || 0}</div><div class="stat-badge">請假: ${data.leaveDays || 0}</div></td>
                         <td>
                             <div class="btn-group">
-                                <button class="action-btn btn-score-up" data-id="${data.id}" data-action="addScore" data-val="1">+1</button>
-                                <button class="action-btn btn-score-up" data-id="${data.id}" data-action="addScore" data-val="2">+2</button>
-                                <button class="action-btn btn-score-up" data-id="${data.id}" data-action="addScore" data-val="5">+5</button>
-                                <button class="action-btn btn-score-down" data-id="${data.id}" data-action="addScore" data-val="-1">-1</button>
+                                <button class="action-btn btn-score-up" onclick="execAction('students', '${data.id}', 'addScore', 1)">+1</button>
+                                <button class="action-btn btn-score-up" onclick="execAction('students', '${data.id}', 'addScore', 2)">+2</button>
+                                <button class="action-btn btn-score-up" onclick="execAction('students', '${data.id}', 'addScore', 5)">+5</button>
+                                <button class="action-btn btn-score-down" onclick="execAction('students', '${data.id}', 'addScore', -1)">-1</button>
                                 <span style="color:#444; margin:0 2px;">|</span>
-                                <button class="action-btn btn-hw" data-id="${data.id}" data-action="missingHw">欠交</button>
-                                <button class="action-btn btn-leave" data-id="${data.id}" data-action="leave">請假</button>
+                                <button class="action-btn btn-hw" onclick="execAction('students', '${data.id}', 'missingHw')">欠交</button>
+                                <button class="action-btn btn-leave" onclick="execAction('students', '${data.id}', 'leave')">請假</button>
                                 <span style="color:#444; margin:0 2px;">|</span>
-                                <button class="action-btn btn-delete" data-id="${data.id}" data-action="delete">抹除</button>
+                                <button class="action-btn btn-delete" onclick="execAction('students', '${data.id}', 'delete')">抹除</button>
                             </div>
                         </td>
                     </tr>
@@ -170,65 +172,76 @@
             });
         }
 
-        document.getElementById('batchBtn').addEventListener('click', async () => {
-            const targetClass = document.getElementById('batchClassSelect').value;
-            const rawData = document.getElementById('batchData').value.trim();
-            if (!rawData) { alert("請先貼上資料！"); return; }
-            
-            const lines = rawData.split('\n');
-            let successCount = 0;
-
-            for (let line of lines) {
-                const parts = line.split(/\t+|\s+/); 
-                if (parts.length >= 2) {
-                    const id = parts[0].trim(); const name = parts[1].trim();
-                    if (id && name) {
-                        try {
-                            await setDoc(doc(db, "students", id), {
-                                name: name, class: targetClass, score: 0, gold: 0, missingHw: 0, leaveDays: 0, cards: []
-                            }, { merge: true });
-                            successCount++;
-                        } catch (e) { console.error("寫入失敗:", id, e); }
-                    }
+        window.execAction = async function(collectionName, id, action, val) {
+            const ref = doc(db, collectionName, id);
+            try {
+                if(action === 'addScore') await updateDoc(ref, { score: increment(val) });
+                else if(action === 'missingHw') await updateDoc(ref, { missingHw: increment(1), score: increment(-2) });
+                else if(action === 'leave') await updateDoc(ref, { leaveDays: increment(1) });
+                else if(action === 'delete') {
+                    if(confirm(`【危險操作】確定要將「${id}」徹底抹除嗎？`)) await deleteDoc(ref);
                 }
-            }
-            alert(`【${targetClass}】擴軍完畢！成功匯入 ${successCount} 筆資料。`);
-            document.getElementById('batchData').value = '';
-        });
+            } catch(e) { console.error("執行失敗", e); }
+        };
 
         document.getElementById('addBtn').addEventListener('click', async () => {
-            const id = document.getElementById('stuId').value.trim();
-            const name = document.getElementById('stuName').value.trim();
-            const cls = document.getElementById('stuClass').value;
+            const id = document.getElementById('stuId').value.trim(); const name = document.getElementById('stuName').value.trim(); const cls = document.getElementById('stuClass').value;
             if (!id || !name) return alert("學號與姓名必填！");
             await setDoc(doc(db, "students", id), { name: name, class: cls }, { merge: true });
             document.getElementById('stuId').value = ''; document.getElementById('stuName').value = '';
         });
 
-        tableBody.addEventListener('click', async (e) => {
-            if (!e.target.classList.contains('action-btn')) return;
-            const id = e.target.getAttribute('data-id');
-            const action = e.target.getAttribute('data-action');
-            const studentRef = doc(db, "students", id);
+        document.getElementById('batchBtn').addEventListener('click', async () => {
+            const targetClass = document.getElementById('batchClassSelect').value; const rawData = document.getElementById('batchData').value.trim();
+            if (!rawData) return;
+            const lines = rawData.split('\n'); let successCount = 0;
+            for (let line of lines) {
+                const parts = line.split(/\t+|\s+/); 
+                if (parts.length >= 2 && parts[0].trim() && parts[1].trim()) {
+                    await setDoc(doc(db, "students", parts[0].trim()), { name: parts[1].trim(), class: targetClass, score: 0, gold: 0, missingHw: 0, leaveDays: 0, cards: [] }, { merge: true });
+                    successCount++;
+                }
+            }
+            alert(`匯入 ${successCount} 筆資料至 ${targetClass}。`); document.getElementById('batchData').value = '';
+        });
+
+        // --- 模組 B：兵器庫 (卡牌系統) ---
+        const cardTableBody = document.getElementById('cardTableBody');
+        
+        onSnapshot(collection(db, "cards"), (snapshot) => {
+            cardTableBody.innerHTML = '';
+            let cardsData = [];
+            snapshot.forEach((doc) => { cardsData.push({ id: doc.id, ...doc.data() }); });
+            
+            // 依照卡牌編號排序
+            cardsData.sort((a, b) => a.id.localeCompare(b.id));
+
+            cardsData.forEach((data) => {
+                cardTableBody.innerHTML += `
+                    <tr>
+                        <td><strong>${data.id}</strong></td>
+                        <td style="color:#00ffcc;">${data.name}</td>
+                        <td><span class="version-tag">${data.version}</span></td>
+                        <td><button class="action-btn btn-delete" onclick="execAction('cards', '${data.id}', 'delete')">銷毀模版</button></td>
+                    </tr>
+                `;
+            });
+        });
+
+        document.getElementById('addCardBtn').addEventListener('click', async () => {
+            const id = document.getElementById('cardId').value.trim();
+            const name = document.getElementById('cardName').value.trim();
+            const version = document.getElementById('cardVersion').value.trim();
+            
+            if (!id || !name || !version) { alert("卡牌編號、名稱與版本皆為必填！"); return; }
             
             try {
-                if (action === "addScore") {
-                    const val = parseInt(e.target.getAttribute('data-val'), 10);
-                    await updateDoc(studentRef, { score: increment(val) });
-                } 
-                else if (action === "missingHw") {
-                    await updateDoc(studentRef, { missingHw: increment(1), score: increment(-2) });
-                } 
-                else if (action === "leave") {
-                    await updateDoc(studentRef, { leaveDays: increment(1) });
-                }
-                else if (action === "delete") {
-                    // 執行物理抹除
-                    if (confirm(`【危險操作】\n確定要將學號「${id}」從系統中徹底抹除嗎？\n此操作不可逆，且該士兵所有積分與卡牌將化為灰燼！`)) {
-                        await deleteDoc(studentRef);
-                    }
-                }
-            } catch (err) { console.error("指令執行失敗:", err); }
+                // merge: true 確保若卡牌已存在，只會更新名稱與版本，不破壞其他潛在設定
+                await setDoc(doc(db, "cards", id), { name: name, version: version }, { merge: true });
+                document.getElementById('cardId').value = ''; 
+                document.getElementById('cardName').value = ''; 
+                // 保留版本欄位不清除，方便主公連續輸入同一版本的卡牌
+            } catch(e) { console.error("卡牌鑄造失敗", e); }
         });
     </script>
 </body>
