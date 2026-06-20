@@ -3,42 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六年制語文 TCG - 系統啟動測試</title>
+    <title>六年制語文 TCG - 數據樞紐測試</title>
     <style>
         body {
-            background-color: #121212;
-            color: #e0e0e0;
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            background-color: #121212; color: #00ffcc; font-family: monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0;
         }
-        .card-placeholder {
-            width: 200px;
-            height: 300px;
-            border: 2px solid #f39c12;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 15px rgba(243, 156, 18, 0.3);
-            margin-bottom: 20px;
+        button {
+            background: #00ffcc; color: #121212; border: none; padding: 15px 30px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; margin: 10px; border-radius: 5px;
+        }
+        button:hover { background: #00b38f; }
+        #terminal {
+            margin-top: 20px; padding: 15px; border: 1px solid #333; width: 300px; 
+            min-height: 80px; background: #000; color: #fff; word-wrap: break-word;
         }
     </style>
 </head>
 <body>
 
-    <div class="card-placeholder">
-        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
-    </div>
+    <h2>伺服器對接面板</h2>
+    <button id="writeBtn">發送測試數據至雲端</button>
+    <button id="readBtn">從雲端讀取數據</button>
+    
+    <div id="terminal">系統待命中...</div>
 
-    <h1>系統運轉正常</h1>
-    <p>語文 TCG 專案已成功連接至外部網路。</p>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // ==========================================
+        // 主公，請將下方大括號內的內容，替換成您在 Step 3 複製的金鑰！
+        // ==========================================
+       const firebaseConfig = {
+  apiKey: "AIzaSyCZ7b0hjgkTMUTTNRDAjkcAMR374BH1c-o",
+  authDomain: "language-tcg-db.firebaseapp.com",
+  projectId: "language-tcg-db",
+  storageBucket: "language-tcg-db.firebasestorage.app",
+  messagingSenderId: "517995107179",
+  appId: "1:517995107179:web:b326458b66991b97f2322e"
+};
+        // ==========================================
+
+        // 啟動資料庫引擎
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const terminal = document.getElementById('terminal');
+
+        // 寫入數據功能
+        document.getElementById('writeBtn').addEventListener('click', async () => {
+            terminal.innerText = "資料上傳中...";
+            try {
+                // 在 students 集合中，建立一個名為 player_001 的文件
+                await setDoc(doc(db, "students", "player_001"), {
+                    name: "測試先鋒",
+                    level: 1,
+                    gold: 500,
+                    cards: ["基礎詞彙卡", "標點符號卡"]
+                });
+                terminal.innerText = "✅ 寫入成功！請切換至 Firebase 網頁的 Firestore 面板查看。";
+            } catch (error) {
+                terminal.innerText = "❌ 寫入失敗: " + error.message;
+            }
+        });
+
+        // 讀取數據功能
+        document.getElementById('readBtn').addEventListener('click', async () => {
+            terminal.innerText = "資料讀取中...";
+            try {
+                const snap = await getDoc(doc(db, "students", "player_001"));
+                if (snap.exists()) {
+                    terminal.innerText = "✅ 讀取成功：\n" + JSON.stringify(snap.data(), null, 2);
+                } else {
+                    terminal.innerText = "⚠️ 找不到該玩家數據。";
+                }
+            } catch (error) {
+                terminal.innerText = "❌ 讀取失敗: " + error.message;
+            }
+        });
+    </script>
 </body>
 </html>
