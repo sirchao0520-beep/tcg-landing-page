@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六年制語文 TCG - 最高中控台 V2.2</title>
+    <title>六年制語文 TCG - 最高中控台 V2.3</title>
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { color: #00ffcc; border-bottom: 2px solid #333; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        h2 { color: #f39c12; border-bottom: 1px dashed #555; padding-bottom: 5px; margin-top: 40px; }
+        h2 { color: #9b59b6; border-bottom: 1px dashed #555; padding-bottom: 5px; margin-top: 40px; }
         
         select.class-filter { background: #2a2a2a; color: #00ffcc; border: 1px solid #00ffcc; padding: 5px 10px; font-size: 16px; border-radius: 4px; cursor: pointer; }
         
         .grid-panel { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; margin-bottom: 20px; }
         .form-box { background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333; }
-        h3 { margin-top: 0; color: #f39c12; font-size: 16px; margin-bottom: 10px; }
+        h3 { margin-top: 0; font-size: 16px; margin-bottom: 10px; }
+        .title-troop { color: #f39c12; }
+        .title-card { color: #9b59b6; }
         
         input, textarea, select { background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; width: calc(100% - 18px); margin-bottom: 10px; font-family: monospace; }
         textarea { height: 80px; resize: none; }
@@ -58,13 +60,13 @@
         
         <div class="grid-panel">
             <div class="form-box" style="border-color: #f39c12;">
-                <h3>閃電擴軍 (從 Excel 複製貼上)</h3>
+                <h3 class="title-troop">閃電擴軍 (從 Excel 複製貼上)</h3>
                 <select id="batchClassSelect" style="width: 100%;"><option value="A班">目標編制：A班</option><option value="B班">目標編制：B班</option><option value="C班">目標編制：C班</option></select>
                 <textarea id="batchData" placeholder="格式需為：學號 [Tab] 姓名&#10;S001 諸葛亮"></textarea>
                 <button id="batchBtn" style="background: #f39c12; color: #fff;">批次注入指定班級</button>
             </div>
             <div class="form-box">
-                <h3>單兵特招 / 資料修正</h3>
+                <h3 class="title-troop">單兵特招 / 資料修正</h3>
                 <div style="display:flex; gap:10px;">
                     <select id="stuClass" style="width:30%; margin:0;"><option value="A班">A班</option><option value="B班">B班</option><option value="C班">C班</option></select>
                     <input type="text" id="stuId" placeholder="學號" style="width:30%; margin:0;" />
@@ -82,19 +84,30 @@
         </table>
 
         <h2>兵器庫 - 卡牌原型控制台</h2>
-        <div class="form-box" style="border-color: #9b59b6;">
-            <h3>鑄造 / 修正卡牌</h3>
-            <p style="font-size: 12px; color: #aaa; margin-top: 0;">※ 輸入已存在的「卡牌編號」即可覆蓋修改其名稱或版本。未來系統支援自行輸入新版本名稱。</p>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="cardId" placeholder="卡牌編號 (例: V1-01)" style="width:25%; margin:0;" />
-                <input type="text" id="cardName" placeholder="卡牌名稱 (例: 基礎標點卡)" style="width:45%; margin:0;" />
-                <input type="text" id="cardVersion" list="versionOptions" placeholder="選擇或輸入版本" style="width:30%; margin:0;" />
-                <datalist id="versionOptions">
-                    <option value="原始版1.0"></option>
-                    <option value="擴張包1.5"></option>
-                </datalist>
+        
+        <div class="grid-panel">
+            <div class="form-box" style="border-color: #9b59b6;">
+                <h3 class="title-card">閃電鑄造卡牌 (從 Excel 複製貼上)</h3>
+                <p style="font-size: 12px; color: #aaa; margin-top: 0;">※ 若卡牌編號已存在，將自動覆蓋更新其名稱與版本。</p>
+                <textarea id="batchCardData" placeholder="格式需為：編號 [Tab] 名稱 [Tab] 版本&#10;V1-01 基礎標點卡 原始版1.0&#10;V1-02 詞彙擴充卡 擴張包1.5"></textarea>
+                <button id="batchCardBtn" style="background: #9b59b6; color: #fff;">批次鑄造入庫</button>
             </div>
-            <button id="addCardBtn" style="background: #9b59b6; color: #fff; margin-top: 10px;">鑄造入庫 / 覆蓋更新</button>
+
+            <div class="form-box">
+                <h3 class="title-card">單卡鑄造 / 資料修正</h3>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="cardId" placeholder="編號 (例: V1-01)" style="width:40%; margin:0;" />
+                        <input type="text" id="cardName" placeholder="名稱 (例: 標點卡)" style="width:60%; margin:0;" />
+                    </div>
+                    <input type="text" id="cardVersion" list="versionOptions" placeholder="選擇或輸入版本" style="width:100%; margin:0;" />
+                    <datalist id="versionOptions">
+                        <option value="原始版1.0"></option>
+                        <option value="擴張包1.5"></option>
+                    </datalist>
+                </div>
+                <button id="addCardBtn" style="background: #9b59b6; color: #fff; margin-top: 10px;">鑄造入庫 / 覆蓋更新</button>
+            </div>
         </div>
 
         <table>
@@ -126,7 +139,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- 模組 A：部隊管理 (與 V2.1 相同) ---
+        // --- 模組 A：部隊管理 ---
         const tableBody = document.getElementById('studentTableBody');
         const viewClassFilter = document.getElementById('viewClassFilter');
         let allStudentsData = [];
@@ -196,9 +209,10 @@
             if (!rawData) return;
             const lines = rawData.split('\n'); let successCount = 0;
             for (let line of lines) {
-                const parts = line.split(/\t+|\s+/); 
-                if (parts.length >= 2 && parts[0].trim() && parts[1].trim()) {
-                    await setDoc(doc(db, "students", parts[0].trim()), { name: parts[1].trim(), class: targetClass, score: 0, gold: 0, missingHw: 0, leaveDays: 0, cards: [] }, { merge: true });
+                const parts = line.split('\t'); // Excel 複製標準分隔符
+                let parsed = parts.length >= 2 ? parts : line.split(/\s+/);
+                if (parsed.length >= 2 && parsed[0].trim() && parsed[1].trim()) {
+                    await setDoc(doc(db, "students", parsed[0].trim()), { name: parsed[1].trim(), class: targetClass, score: 0, gold: 0, missingHw: 0, leaveDays: 0, cards: [] }, { merge: true });
                     successCount++;
                 }
             }
@@ -212,8 +226,6 @@
             cardTableBody.innerHTML = '';
             let cardsData = [];
             snapshot.forEach((doc) => { cardsData.push({ id: doc.id, ...doc.data() }); });
-            
-            // 依照卡牌編號排序
             cardsData.sort((a, b) => a.id.localeCompare(b.id));
 
             cardsData.forEach((data) => {
@@ -232,16 +244,48 @@
             const id = document.getElementById('cardId').value.trim();
             const name = document.getElementById('cardName').value.trim();
             const version = document.getElementById('cardVersion').value.trim();
-            
             if (!id || !name || !version) { alert("卡牌編號、名稱與版本皆為必填！"); return; }
-            
             try {
-                // merge: true 確保若卡牌已存在，只會更新名稱與版本，不破壞其他潛在設定
                 await setDoc(doc(db, "cards", id), { name: name, version: version }, { merge: true });
-                document.getElementById('cardId').value = ''; 
-                document.getElementById('cardName').value = ''; 
-                // 保留版本欄位不清除，方便主公連續輸入同一版本的卡牌
+                document.getElementById('cardId').value = ''; document.getElementById('cardName').value = ''; 
             } catch(e) { console.error("卡牌鑄造失敗", e); }
+        });
+
+        // 【全新核心：兵器庫批量匯入解析引擎】
+        document.getElementById('batchCardBtn').addEventListener('click', async () => {
+            const rawData = document.getElementById('batchCardData').value.trim();
+            if (!rawData) { alert("請先貼上資料！"); return; }
+            
+            const lines = rawData.split('\n');
+            let successCount = 0;
+
+            for (let line of lines) {
+                // Excel 複製預設為 Tab (\t) 分隔
+                const parts = line.split('\t'); 
+                let parsed = parts;
+                
+                // 若手動輸入使用空格，退回使用正則匹配空格，但這可能會截斷帶有空格的卡牌名稱
+                if(parsed.length < 3) {
+                    parsed = line.split(/\s+/);
+                }
+
+                if (parsed.length >= 3) {
+                    const id = parsed[0].trim(); 
+                    const name = parsed[1].trim();
+                    const version = parsed[2].trim();
+                    
+                    if (id && name && version) {
+                        try {
+                            await setDoc(doc(db, "cards", id), {
+                                name: name, version: version
+                            }, { merge: true });
+                            successCount++;
+                        } catch (e) { console.error("鑄造失敗:", id, e); }
+                    }
+                }
+            }
+            alert(`擴張包鑄造完畢！成功匯入 ${successCount} 張卡牌。`);
+            document.getElementById('batchCardData').value = '';
         });
     </script>
 </body>
