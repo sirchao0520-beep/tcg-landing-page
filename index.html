@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六年制語文 TCG - 最高中控台 V2.4</title>
+    <title>六年制語文 TCG - 最高中控台 V2.7</title>
     <style>
-        /* ... 原有 CSS 保持不變，為了篇幅精簡，請見下方新增區塊 ... */
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { color: #00ffcc; border-bottom: 2px solid #333; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -23,102 +22,88 @@
         table { width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-top: 10px; }
         th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #333; font-size: 14px; }
         th { background-color: #2a2a2a; color: #00ffcc; white-space: nowrap; }
-        .btn-group { display: flex; gap: 4px; flex-wrap: wrap; }
-        .action-btn { width: auto; padding: 4px 8px; font-size: 12px; border-radius: 3px; }
+        
+        .btn-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        .action-btn { width: auto; padding: 5px 10px; font-size: 12px; border-radius: 3px; font-weight: bold; }
         .btn-score-up { background: #3498db; color: #fff; } .btn-score-down { background: #e74c3c; color: #fff; } 
-        .btn-hw { background: #9b59b6; color: #fff; } .btn-leave { background: #95a5a6; color: #121212; } 
-        .btn-delete { background: #555; color: #ff6b6b; border: 1px solid #ff6b6b; } .btn-delete:hover { background: #ff6b6b; color: #fff; }
-        .btn-inventory { background: #e67e22; color: #fff; border: 1px solid #d35400; } .btn-inventory:hover { background: #d35400; }
+        .btn-inventory { background: #e67e22; color: #fff; border: 1px solid #d35400; } 
+        .btn-discipline { background: #34495e; color: #fff; border: 1px solid #2c3e50; } .btn-discipline:hover { background: #2c3e50; }
+        
+        /* 極微小化的刪除按鈕 */
+        .btn-delete-mini { background: transparent; color: #ff6b6b; border: none; padding: 4px; cursor: pointer; border-radius: 3px; font-size: 12px; font-weight: bold; transition: 0.2s; opacity: 0.7; } 
+        .btn-delete-mini:hover { background: #ff6b6b; color: #fff; opacity: 1; }
+        
         .stat-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: #333; margin-left: 5px; }
         .warn-text { color: #e74c3c; } .version-tag { color: #9b59b6; font-size: 12px; border: 1px solid #9b59b6; padding: 2px 4px; border-radius: 3px; }
 
-        /* ======== 全新：核銷彈出視窗 (Modal) ======== */
+        /* ======== 彈出視窗 (Modal) 共用 ======== */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
-        .modal-content { background-color: #1e1e1e; margin: 10% auto; padding: 20px; border: 1px solid #e67e22; border-radius: 8px; width: 80%; max-width: 600px; color: #fff; }
-        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close-btn:hover { color: #fff; }
-        
+        .modal-content { background-color: #1e1e1e; margin: 5% auto; padding: 20px; border: 1px solid #e67e22; border-radius: 8px; width: 80%; max-width: 600px; color: #fff; max-height: 80vh; overflow-y: auto; }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; } .close-btn:hover { color: #fff; }
         .inv-section { margin-top: 15px; background: #2a2a2a; padding: 10px; border-radius: 6px; }
         .inv-section h4 { margin: 0 0 10px 0; color: #e67e22; border-bottom: 1px dashed #444; padding-bottom: 5px; }
         .inv-item { display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; padding: 8px 12px; margin-bottom: 5px; border-radius: 4px; border-left: 3px solid #e74c3c; }
         .inv-item.redeemed { border-left-color: #2ecc71; opacity: 0.7; }
+        .inv-item.leave { border-left-color: #95a5a6; }
         .inv-info { display: flex; flex-direction: column; }
         .inv-time { font-size: 10px; color: #888; }
-        .btn-redeem { background: #2ecc71; color: #121212; padding: 5px 15px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; }
-        .btn-redeem:hover { background: #27ae60; }
+        .btn-redeem { background: #2ecc71; color: #121212; padding: 5px 15px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; } .btn-redeem:hover { background: #27ae60; }
+        .btn-hw-action { background: #e74c3c; color: #fff; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-leave-action { background: #95a5a6; color: #121212; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>
-            天工督軍 - 部隊作戰面板 
-            <select id="viewClassFilter" class="class-filter">
-                <option value="ALL">顯示全部兵力</option>
-                <option value="A班">僅顯示 A班</option>
-                <option value="B班">僅顯示 B班</option>
-                <option value="C班">僅顯示 C班</option>
-            </select>
-        </h1>
-        
+        <h1>天工督軍 - 部隊作戰面板 <select id="viewClassFilter" class="class-filter"><option value="ALL">顯示全部</option><option value="A班">A班</option><option value="B班">B班</option><option value="C班">C班</option></select></h1>
         <div class="grid-panel">
-            <div class="form-box" style="border-color: #f39c12;">
-                <h3 class="title-troop">閃電擴軍</h3>
-                <select id="batchClassSelect" style="width: 100%;"><option value="A班">A班</option><option value="B班">B班</option><option value="C班">C班</option></select>
-                <textarea id="batchData" placeholder="S001 諸葛亮"></textarea>
-                <button id="batchBtn" style="background: #f39c12; color: #fff;">批次注入</button>
-            </div>
-            <div class="form-box">
-                <h3 class="title-troop">單兵特招</h3>
-                <div style="display:flex; gap:10px;">
-                    <select id="stuClass" style="width:30%; margin:0;"><option value="A班">A班</option><option value="B班">B班</option><option value="C班">C班</option></select>
-                    <input type="text" id="stuId" placeholder="學號" style="width:30%; margin:0;" />
-                    <input type="text" id="stuName" placeholder="姓名" style="width:40%; margin:0;" />
-                </div>
-                <button id="addBtn" style="margin-top: 10px;">建檔 / 更新</button>
-            </div>
+            <div class="form-box" style="border-color: #f39c12;"><h3 class="title-troop">閃電擴軍</h3><select id="batchClassSelect" style="width: 100%;"><option value="A班">A班</option><option value="B班">B班</option><option value="C班">C班</option></select><textarea id="batchData" placeholder="S001 諸葛亮"></textarea><button id="batchBtn" style="background: #f39c12; color: #fff;">批次注入</button></div>
+            <div class="form-box"><h3 class="title-troop">單兵特招</h3><div style="display:flex; gap:10px;"><select id="stuClass" style="width:30%; margin:0;"><option value="A班">A班</option><option value="B班">B班</option><option value="C班">C班</option></select><input type="text" id="stuId" placeholder="學號" style="width:30%; margin:0;" /><input type="text" id="stuName" placeholder="姓名" style="width:40%; margin:0;" /></div><button id="addBtn" style="margin-top: 10px;">建檔 / 更新</button></div>
         </div>
 
         <table>
-            <thead>
-                <tr><th>學號</th><th>姓名</th><th>班級</th><th>積分</th><th>金幣</th><th>狀態紀錄</th><th>戰術/核銷面板</th></tr>
-            </thead>
+            <thead><tr><th>學號</th><th>姓名</th><th>班級</th><th>積分</th><th>金幣</th><th>狀態紀錄</th><th>戰術/核銷面板</th></tr></thead>
             <tbody id="studentTableBody"></tbody>
         </table>
 
         <h2>兵器庫 - 卡牌原型控制台</h2>
         <div class="grid-panel">
-            <div class="form-box" style="border-color: #9b59b6;">
-                <h3 class="title-card">閃電鑄造卡牌</h3>
-                <textarea id="batchCardData" placeholder="V1-01 基礎標點卡 原始版1.0"></textarea>
-                <button id="batchCardBtn" style="background: #9b59b6; color: #fff;">批次鑄造入庫</button>
-            </div>
-            <div class="form-box">
-                <h3 class="title-card">單卡鑄造</h3>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="cardId" placeholder="編號" style="width:40%; margin:0;" />
-                    <input type="text" id="cardName" placeholder="名稱" style="width:60%; margin:0;" />
-                </div>
-                <input type="text" id="cardVersion" placeholder="版本" style="width:100%; margin-top:10px;" />
-                <button id="addCardBtn" style="background: #9b59b6; color: #fff; margin-top: 10px;">鑄造入庫</button>
-            </div>
+            <div class="form-box" style="border-color: #9b59b6;"><h3 class="title-card">閃電鑄造卡牌</h3><textarea id="batchCardData" placeholder="V1-01 標點卡 1.0"></textarea><button id="batchCardBtn" style="background: #9b59b6; color: #fff;">批次鑄造</button></div>
+            <div class="form-box"><h3 class="title-card">單卡鑄造</h3><div style="display:flex; gap:10px;"><input type="text" id="cardId" placeholder="編號" style="width:40%; margin:0;" /><input type="text" id="cardName" placeholder="名稱" style="width:60%; margin:0;" /></div><input type="text" id="cardVersion" placeholder="版本" style="width:100%; margin-top:10px;" /><button id="addCardBtn" style="background: #9b59b6; color: #fff; margin-top: 10px;">鑄造入庫</button></div>
         </div>
-        <table style="width:50%;"><thead><tr><th>卡牌編號</th><th>卡牌名稱</th><th>版本</th></tr></thead><tbody id="cardTableBody"></tbody></table>
+        <table style="width:50%;"><thead><tr><th>編號</th><th>名稱</th><th>版本</th></tr></thead><tbody id="cardTableBody"></tbody></table>
     </div>
 
     <div id="inventoryModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle" style="color:#e67e22; margin-top:0;">學生背包核銷</h2>
+        <div class="modal-content" style="border-color: #e67e22;">
+            <span class="close-btn" onclick="closeModal('inventoryModal')">&times;</span>
+            <h2 id="invModalTitle" style="color:#e67e22; margin-top:0;">學生背包核銷</h2>
+            <div class="inv-section"><h4>⚠️ 待核銷</h4><div id="pendingList"></div></div>
+            <div class="inv-section" style="opacity: 0.8;"><h4 style="color:#2ecc71; border-color:#333;">✅ 歷史紀錄</h4><div id="redeemedList"></div></div>
+        </div>
+    </div>
+
+    <div id="disciplineModal" class="modal">
+        <div class="modal-content" style="border-color: #3498db;">
+            <span class="close-btn" onclick="closeModal('disciplineModal')">&times;</span>
+            <h2 id="discModalTitle" style="color:#3498db; margin-top:0;">功課紀律追蹤面板</h2>
             
+            <div style="background: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <input type="text" id="hwTitleInput" placeholder="輸入作業名稱 (例如：第十課抄寫)" style="width: 100%; box-sizing: border-box; margin-bottom: 10px; border-color:#3498db;" />
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-hw-action" onclick="addAssignment('missing')" style="flex:1;">登記欠交 (-2分/-20金)</button>
+                    <button class="btn-leave-action" onclick="addAssignment('leave')" style="flex:1;">登記請假 (免扣分)</button>
+                </div>
+            </div>
+
             <div class="inv-section">
-                <h4>⚠️ 待核銷 (需發放實體卡)</h4>
-                <div id="pendingList"></div>
+                <h4 style="color:#e74c3c;">🚨 待補交清單</h4>
+                <div id="pendingHwList"></div>
             </div>
 
             <div class="inv-section" style="opacity: 0.8;">
-                <h4 style="color:#2ecc71; border-color:#333;">✅ 已核銷歷史紀錄</h4>
-                <div id="redeemedList"></div>
+                <h4 style="color:#2ecc71;">✅ 已補交/結案紀錄</h4>
+                <div id="resolvedHwList"></div>
             </div>
         </div>
     </div>
@@ -139,6 +124,7 @@
             appId: "1:517995107179:web:b326458b66991b97f2322e"
         };
         // ==========================================
+     
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -165,24 +151,29 @@
             });
 
             filteredData.forEach((data) => {
-                // 計算待核銷數量
-                const pendingCount = (data.cards || []).filter(c => !c.redeemed).length;
-                const alertHTML = pendingCount > 0 ? `<span style="background:#e74c3c; color:#fff; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:5px;">${pendingCount}</span>` : '';
+                const pendingCards = (data.cards || []).filter(c => !c.redeemed).length;
+                const cardAlert = pendingCards > 0 ? `<span style="background:#e74c3c; color:#fff; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:5px;">${pendingCards}</span>` : '';
+                
+                const pendingHw = (data.assignments || []).filter(a => a.status === 'pending').length;
+                const hwAlert = pendingHw > 0 ? `<span style="background:#e74c3c; color:#fff; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:5px;">${pendingHw}</span>` : '';
 
+                // 【介面精準化調整】：恢復 +1/-1，簡化文字，縮小抹除鍵
                 tableBody.innerHTML += `
                     <tr>
                         <td><strong>${data.id}</strong></td><td>${data.name || ''}</td><td style="color:#aaa;">${data.class || ''}</td>
                         <td style="color:#3498db; font-weight:bold; font-size:16px;">${data.score || 0}</td><td style="color:#f1c40f; font-weight:bold;">${data.gold || 0}</td>
-                        <td><div class="stat-badge ${data.missingHw > 0 ? 'warn-text' : ''}">欠交: ${data.missingHw || 0}</div></td>
+                        <td>
+                            <div class="stat-badge ${data.missingHw > 0 ? 'warn-text' : ''}">欠交: ${data.missingHw || 0}</div>
+                            <div class="stat-badge">請假: ${data.leaveDays || 0}</div>
+                        </td>
                         <td>
                             <div class="btn-group">
                                 <button class="action-btn btn-score-up" onclick="execAction('students', '${data.id}', 'addScore', 1)">+1</button>
-                                <button class="action-btn btn-score-up" onclick="execAction('students', '${data.id}', 'addScore', 2)">+2</button>
                                 <button class="action-btn btn-score-down" onclick="execAction('students', '${data.id}', 'addScore', -1)">-1</button>
                                 <span style="color:#444; margin:0 2px;">|</span>
-                                <button class="action-btn btn-hw" onclick="execAction('students', '${data.id}', 'missingHw')">欠交</button>
-                                <span style="color:#444; margin:0 2px;">|</span>
-                                <button class="action-btn btn-inventory" onclick="openModal('${data.id}', '${data.name}')">🎒 查閱背包${alertHTML}</button>
+                                <button class="action-btn btn-discipline" onclick="openDiscModal('${data.id}', '${data.name}')">📜 功課${hwAlert}</button>
+                                <button class="action-btn btn-inventory" onclick="openInvModal('${data.id}', '${data.name}')">🎒 背包${cardAlert}</button>
+                                <button class="btn-delete-mini" onclick="execAction('students', '${data.id}', 'delete')" title="重置兵籍">✖</button>
                             </div>
                         </td>
                     </tr>
@@ -192,113 +183,173 @@
 
         window.execAction = async function(collectionName, id, action, val) {
             const ref = doc(db, collectionName, id);
-            try {
-                if(action === 'addScore') await updateDoc(ref, { score: increment(val), gold: increment(val * 10) });
-                else if(action === 'missingHw') await updateDoc(ref, { missingHw: increment(1), score: increment(-2), gold: increment(-20) });
-            } catch(e) { console.error("執行失敗", e); }
+            try { 
+                if(action === 'addScore') await updateDoc(ref, { score: increment(val), gold: increment(val * 10) }); 
+                else if(action === 'delete') {
+                    if(confirm(`【年度兵籍重置警告】\n確定要將兵籍「${id}」徹底抹除嗎？\n此動作不可逆！`)) await deleteDoc(ref);
+                }
+            } 
+            catch(e) { console.error("執行失敗", e); }
         };
 
-        // ======== 彈出視窗與核銷邏輯 ========
-        let currentModalStudentId = null;
+        // ======== 彈出視窗全域控制 ========
+        let currentTargetStudentId = null;
 
-        window.openModal = function(stuId, stuName) {
-            currentModalStudentId = stuId;
-            document.getElementById('modalTitle').innerText = `🎒 [${stuId}] ${stuName} 的裝備庫`;
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = "none";
+            currentTargetStudentId = null;
+        };
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) event.target.style.display = "none";
+        };
+
+        // ======== 背包核銷邏輯 ========
+        window.openInvModal = function(stuId, stuName) {
+            currentTargetStudentId = stuId;
+            document.getElementById('invModalTitle').innerText = `🎒 [${stuId}] ${stuName} 的裝備庫`;
             document.getElementById('inventoryModal').style.display = "block";
-            renderModalData(); // 渲染名單
+            renderInvData(); 
         };
-
-        window.closeModal = function() {
-            document.getElementById('inventoryModal').style.display = "none";
-            currentModalStudentId = null;
-        };
-
-        async function renderModalData() {
-            if(!currentModalStudentId) return;
-            const ref = doc(db, "students", currentModalStudentId);
-            const snap = await getDoc(ref);
+        async function renderInvData() { 
+            if(!currentTargetStudentId) return;
+            const snap = await getDoc(doc(db, "students", currentTargetStudentId));
             if(!snap.exists()) return;
-
             const cards = snap.data().cards || [];
-            const pendingList = document.getElementById('pendingList');
-            const redeemedList = document.getElementById('redeemedList');
-            
-            pendingList.innerHTML = ''; redeemedList.innerHTML = '';
-            let hasPending = false, hasRedeemed = false;
+            const pList = document.getElementById('pendingList'); const rList = document.getElementById('redeemedList');
+            pList.innerHTML = ''; rList.innerHTML = '';
+            [...cards].reverse().forEach(c => {
+                const sId = c.instanceId || `old_${c.name}`;
+                if(!c.redeemed) pList.innerHTML += `<div class="inv-item"><div class="inv-info"><strong style="color:#00ffcc;">${c.name}</strong><span class="inv-time">${c.drawTime||''}</span></div><button class="btn-redeem" onclick="redeemCard('${sId}')">✅ 發放</button></div>`;
+                else rList.innerHTML += `<div class="inv-item redeemed"><div class="inv-info"><strong style="color:#aaa;">${c.name}</strong><span class="inv-time">${c.redeemTime||''}</span></div><span style="font-size:12px; color:#2ecc71;">已發放</span></div>`;
+            });
+        }
+        window.redeemCard = async function(tId) {
+            const ref = doc(db, "students", currentTargetStudentId);
+            const snap = await getDoc(ref); let cards = snap.data().cards || [];
+            const idx = cards.findIndex(c => c.instanceId === tId || `old_${c.name}` === tId);
+            if(idx !== -1) { cards[idx].redeemed = true; cards[idx].redeemTime = new Date().toLocaleString(); await updateDoc(ref, { cards: cards }); renderInvData(); }
+        };
 
-            // 反轉陣列，讓最新抽到的在最上面
-            [...cards].reverse().forEach(card => {
-                // 容錯處理：若舊數據沒有 instanceId，臨時賦予一個
-                const safeId = card.instanceId || `old_${card.name}`; 
+        // ======== 功課紀律邏輯 ========
+        window.openDiscModal = function(stuId, stuName) {
+            currentTargetStudentId = stuId;
+            document.getElementById('discModalTitle').innerText = `📜 [${stuId}] ${stuName} 的功課`;
+            document.getElementById('hwTitleInput').value = ''; 
+            document.getElementById('disciplineModal').style.display = "block";
+            renderDiscData(); 
+        };
+
+        window.addAssignment = async function(type) {
+            const title = document.getElementById('hwTitleInput').value.trim();
+            if (!title) { alert("請輸入具體的功課名稱！"); return; }
+            if (!currentTargetStudentId) return;
+
+            const ref = doc(db, "students", currentTargetStudentId);
+            const newAssignment = {
+                id: Date.now().toString(),
+                title: title,
+                type: type, 
+                status: 'pending',
+                date: new Date().toLocaleDateString()
+            };
+
+            try {
+                const snap = await getDoc(ref);
+                let assignments = snap.data().assignments || [];
+                assignments.push(newAssignment);
+
+                let updates = { assignments: assignments };
                 
-                if(!card.redeemed) {
+                if (type === 'missing') {
+                    updates.score = increment(-2);
+                    updates.gold = increment(-20);
+                    updates.missingHw = increment(1);
+                } else {
+                    updates.leaveDays = increment(1);
+                }
+
+                await updateDoc(ref, updates);
+                document.getElementById('hwTitleInput').value = '';
+                renderDiscData(); 
+            } catch (e) { console.error("新增功課紀錄失敗", e); }
+        };
+
+        async function renderDiscData() {
+            if(!currentTargetStudentId) return;
+            const snap = await getDoc(doc(db, "students", currentTargetStudentId));
+            if(!snap.exists()) return;
+            
+            const assignments = snap.data().assignments || [];
+            const pList = document.getElementById('pendingHwList');
+            const rList = document.getElementById('resolvedHwList');
+            
+            pList.innerHTML = ''; rList.innerHTML = '';
+            let hasPending = false, hasResolved = false;
+
+            [...assignments].reverse().forEach(hw => {
+                const isMissing = hw.type === 'missing';
+                const typeText = isMissing ? '欠交' : '請假';
+                const typeColor = isMissing ? '#e74c3c' : '#95a5a6';
+                const typeClass = isMissing ? '' : 'leave';
+
+                if(hw.status === 'pending') {
                     hasPending = true;
-                    pendingList.innerHTML += `
-                        <div class="inv-item">
+                    pList.innerHTML += `
+                        <div class="inv-item ${typeClass}">
                             <div class="inv-info">
-                                <strong style="color:#00ffcc;">${card.name}</strong>
-                                <span class="inv-time">抽取時間: ${card.drawTime || '未知'}</span>
+                                <div><span style="color:${typeColor}; font-weight:bold;">[${typeText}]</span> <strong>${hw.title}</strong></div>
+                                <span class="inv-time">登記日期: ${hw.date}</span>
                             </div>
-                            <button class="btn-redeem" onclick="redeemCard('${safeId}')">✅ 發放實體並核銷</button>
+                            <button class="btn-redeem" onclick="resolveHw('${hw.id}')">☑️ 確認補交</button>
                         </div>
                     `;
                 } else {
-                    hasRedeemed = true;
-                    redeemedList.innerHTML += `
+                    hasResolved = true;
+                    rList.innerHTML += `
                         <div class="inv-item redeemed">
                             <div class="inv-info">
-                                <strong style="color:#aaa;">${card.name}</strong>
-                                <span class="inv-time">核銷時間: ${card.redeemTime || '未知'}</span>
+                                <div><span style="color:#888;">[${typeText}]</span> <strong style="color:#aaa; text-decoration:line-through;">${hw.title}</strong></div>
+                                <span class="inv-time">結案時間: ${hw.resolveDate || ''}</span>
                             </div>
-                            <span style="font-size:12px; color:#2ecc71;">已發放</span>
+                            <span style="font-size:12px; color:#2ecc71;">已補交</span>
                         </div>
                     `;
                 }
             });
 
-            if(!hasPending) pendingList.innerHTML = `<div style="color:#888; text-align:center;">目前無待核銷卡牌。</div>`;
-            if(!hasRedeemed) redeemedList.innerHTML = `<div style="color:#888; text-align:center;">尚無核銷歷史。</div>`;
+            if(!hasPending) pList.innerHTML = `<div style="color:#888; text-align:center;">目前無積欠作業。太棒了！</div>`;
+            if(!hasResolved) rList.innerHTML = `<div style="color:#888; text-align:center;">尚無補交歷史。</div>`;
         }
 
-        window.redeemCard = async function(targetInstanceId) {
-            if(!currentModalStudentId) return;
+        window.resolveHw = async function(hwId) {
+            if(!currentTargetStudentId) return;
             try {
-                const ref = doc(db, "students", currentModalStudentId);
+                const ref = doc(db, "students", currentTargetStudentId);
                 const snap = await getDoc(ref);
-                let cards = snap.data().cards || [];
+                let assignments = snap.data().assignments || [];
                 
-                // 尋找目標卡牌 (以 instanceId 匹配)
-                const targetIndex = cards.findIndex(c => c.instanceId === targetInstanceId || `old_${c.name}` === targetInstanceId);
-                
-                if(targetIndex !== -1) {
-                    cards[targetIndex].redeemed = true;
-                    cards[targetIndex].redeemTime = new Date().toLocaleString();
-                    
-                    // 寫回資料庫
-                    await updateDoc(ref, { cards: cards });
-                    
-                    // 重新渲染 Modal，因為資料改變了
-                    renderModalData();
+                const idx = assignments.findIndex(a => a.id === hwId);
+                if(idx !== -1) {
+                    assignments[idx].status = 'resolved';
+                    assignments[idx].resolveDate = new Date().toLocaleString();
+                    await updateDoc(ref, { assignments: assignments });
+                    renderDiscData();
                 }
-            } catch(e) { console.error("核銷失敗", e); }
+            } catch(e) { console.error("補交確認失敗", e); }
         };
 
-        // 點擊 Modal 外部關閉
-        window.onclick = function(event) {
-            const modal = document.getElementById('inventoryModal');
-            if (event.target == modal) closeModal();
-        }
-
-        // --- 模組 B：兵器庫 (精簡版) ---
+        // --- 模組 B：兵器庫 ---
         onSnapshot(collection(db, "cards"), (snapshot) => {
             const cardTableBody = document.getElementById('cardTableBody'); cardTableBody.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const d = doc.data();
-                cardTableBody.innerHTML += `<tr><td><strong>${doc.id}</strong></td><td style="color:#00ffcc;">${d.name}</td><td><span class="version-tag">${d.version}</span></td></tr>`;
+            let cardsData = [];
+            snapshot.forEach((doc) => { cardsData.push({ id: doc.id, ...doc.data() }); });
+            cardsData.sort((a, b) => a.id.localeCompare(b.id));
+            cardsData.forEach((d) => {
+                cardTableBody.innerHTML += `<tr><td><strong>${d.id}</strong></td><td style="color:#00ffcc;">${d.name}</td><td><span class="version-tag">${d.version}</span></td></tr>`;
             });
         });
-        document.getElementById('addCardBtn').addEventListener('click', async () => { /* 鑄造邏輯略 */ });
-        document.getElementById('batchCardBtn').addEventListener('click', async () => { /* 批次邏輯略 */ });
+        document.getElementById('addCardBtn').addEventListener('click', async () => { /* 單卡邏輯保留隱藏 */ });
+        document.getElementById('batchCardBtn').addEventListener('click', async () => { /* 批次邏輯保留隱藏 */ });
     </script>
 </body>
 </html>
