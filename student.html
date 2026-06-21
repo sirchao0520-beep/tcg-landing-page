@@ -3,29 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六年制語文 TCG - 學生裝備總署</title>
+    <title>六年制語文 TCG - 學生裝備總署 V1.1</title>
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 600px; width: 100%; }
-        
         h1 { color: #00ffcc; border-bottom: 2px solid #333; padding-bottom: 10px; text-align: center; }
         
-        /* 登入面板 */
         #loginPanel { background: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #333; text-align: center; margin-top: 50px; }
         input { background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 12px; border-radius: 4px; width: 80%; font-size: 18px; text-align: center; margin-bottom: 20px; letter-spacing: 2px; }
         input:focus { border-color: #00ffcc; outline: none; }
         .btn-login { background: #00ffcc; color: #121212; border: none; padding: 12px 30px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .btn-login:hover { background: #00b38f; }
 
-        /* 裝備總署面板 (預設隱藏) */
         #dashboardPanel { display: none; }
-        
-        /* 狀態卡片 */
         .status-card { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .profile { display: flex; flex-direction: column; }
         .stu-name { font-size: 24px; font-weight: bold; color: #fff; }
         .stu-id { font-size: 14px; color: #888; }
-        
         .stats { display: flex; gap: 20px; text-align: center; }
         .stat-box { display: flex; flex-direction: column; }
         .stat-value { font-size: 28px; font-weight: bold; }
@@ -33,53 +27,43 @@
         .score-text { color: #3498db; }
         .gold-text { color: #f1c40f; }
 
-        /* 抽卡引擎區塊 */
         .gacha-box { background: linear-gradient(145deg, #2c1e3e, #1e1e1e); padding: 20px; border-radius: 8px; border: 1px solid #9b59b6; text-align: center; margin-bottom: 20px; }
         .gacha-cost { color: #f1c40f; font-size: 14px; margin-bottom: 10px; }
         .btn-gacha { background: #9b59b6; color: #fff; border: none; padding: 15px 40px; font-weight: bold; border-radius: 50px; cursor: pointer; font-size: 18px; transition: 0.1s; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4); }
         .btn-gacha:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(155, 89, 182, 0.4); }
         .btn-gacha:disabled { background: #555; color: #888; cursor: not-allowed; box-shadow: none; }
-        
-        /* 抽卡結果廣播 */
         #pullResult { margin-top: 15px; font-size: 18px; font-weight: bold; color: #00ffcc; min-height: 25px; }
 
-        /* 背包區塊 (未來擴充 SVG 的地基) */
         h3 { color: #aaa; border-bottom: 1px dashed #444; padding-bottom: 5px; }
         .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
-        .card-placeholder { background: #2a2a2a; border: 1px solid #444; border-radius: 6px; padding: 15px; text-align: center; min-height: 80px; display: flex; flex-direction: column; justify-content: center; }
+        .card-placeholder { background: #2a2a2a; border: 1px solid #444; border-radius: 6px; padding: 15px; text-align: center; min-height: 80px; display: flex; flex-direction: column; justify-content: center; position: relative; }
         .card-name { font-weight: bold; color: #00ffcc; font-size: 14px; margin-bottom: 5px; }
         .card-version { font-size: 10px; color: #9b59b6; border: 1px solid #9b59b6; border-radius: 3px; padding: 2px 4px; display: inline-block; }
+        
+        /* 狀態標籤 */
+        .status-badge { position: absolute; top: -5px; right: -5px; font-size: 10px; padding: 3px 6px; border-radius: 10px; font-weight: bold; }
+        .status-pending { background: #e74c3c; color: #fff; }
+        .status-redeemed { background: #2ecc71; color: #121212; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>天工督軍 - 士兵裝備總署</h1>
-
         <div id="loginPanel">
             <h2 style="color: #fff; margin-top: 0;">兵籍認證</h2>
-            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">請輸入您的專屬學號以調閱裝備庫</p>
-            <input type="text" id="loginId" placeholder="輸入學號 (如 S001)" />
+            <input type="text" id="loginId" placeholder="輸入學號 (如 A01)" />
             <br>
             <button class="btn-login" id="loginBtn">連線認證</button>
-            <div id="loginError" style="color: #e74c3c; margin-top: 15px; font-size: 14px; display: none;">⚠️ 查無此兵籍，請確認學號是否正確。</div>
+            <div id="loginError" style="color: #e74c3c; margin-top: 15px; font-size: 14px; display: none;">⚠️ 查無此兵籍。</div>
         </div>
 
         <div id="dashboardPanel">
             <div class="status-card">
-                <div class="profile">
-                    <span class="stu-name" id="uiName">載入中...</span>
-                    <span class="stu-id" id="uiId">ID: ---</span>
-                </div>
+                <div class="profile"><span class="stu-name" id="uiName">載入中...</span><span class="stu-id" id="uiId">ID: ---</span></div>
                 <div class="stats">
-                    <div class="stat-box">
-                        <span class="stat-value score-text" id="uiScore">0</span>
-                        <span class="stat-label">累積總積分</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value gold-text" id="uiGold">0</span>
-                        <span class="stat-label">可兌換金幣</span>
-                    </div>
+                    <div class="stat-box"><span class="stat-value score-text" id="uiScore">0</span><span class="stat-label">累積總積分</span></div>
+                    <div class="stat-box"><span class="stat-value gold-text" id="uiGold">0</span><span class="stat-label">可兌換金幣</span></div>
                 </div>
             </div>
 
@@ -90,8 +74,7 @@
             </div>
 
             <h3>已獲得卡牌 (<span id="cardCount">0</span>)</h3>
-            <div class="inventory-grid" id="inventoryGrid">
-                </div>
+            <div class="inventory-grid" id="inventoryGrid"></div>
         </div>
     </div>
 
@@ -115,7 +98,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // UI 節點映射
         const loginPanel = document.getElementById('loginPanel');
         const dashboardPanel = document.getElementById('dashboardPanel');
         const loginBtn = document.getElementById('loginBtn');
@@ -123,73 +105,45 @@
         const gachaBtn = document.getElementById('gachaBtn');
         const pullResult = document.getElementById('pullResult');
         
-        const DRAW_COST = 50; // 定義抽卡消耗金幣數量
+        const DRAW_COST = 50; 
         let currentStudentId = null;
-        let gachaPool = []; // 儲存從兵器庫抓取的全卡池
+        let gachaPool = []; 
 
-        // 【模組一：認證登入與池子預載】
         loginBtn.addEventListener('click', async () => {
             const stuId = document.getElementById('loginId').value.trim();
             if (!stuId) return;
-
             loginBtn.innerText = "驗證中...";
             try {
-                const docRef = doc(db, "students", stuId);
-                const docSnap = await getDoc(docRef);
-
+                const docSnap = await getDoc(doc(db, "students", stuId));
                 if (docSnap.exists()) {
                     currentStudentId = stuId;
-                    loginError.style.display = 'none';
-                    loginPanel.style.display = 'none';
-                    dashboardPanel.style.display = 'block';
-                    
-                    // 預先載入卡池資料
-                    await loadGachaPool();
-                    // 啟動專屬數據監聽
-                    startStudentListener(stuId);
+                    loginError.style.display = 'none'; loginPanel.style.display = 'none'; dashboardPanel.style.display = 'block';
+                    await loadGachaPool(); startStudentListener(stuId);
                 } else {
-                    loginError.style.display = 'block';
-                    loginBtn.innerText = "連線認證";
+                    loginError.style.display = 'block'; loginBtn.innerText = "連線認證";
                 }
-            } catch (e) {
-                console.error("登入錯誤:", e);
-                loginBtn.innerText = "連線認證";
-            }
+            } catch (e) { console.error("登入錯誤:", e); loginBtn.innerText = "連線認證"; }
         });
 
-        // 載入兵器庫全卡牌
         async function loadGachaPool() {
             const querySnapshot = await getDocs(collection(db, "cards"));
             gachaPool = [];
-            querySnapshot.forEach((doc) => {
-                // 將卡牌資料存入本地陣列
-                gachaPool.push({ id: doc.id, name: doc.data().name, version: doc.data().version });
-            });
+            querySnapshot.forEach((doc) => { gachaPool.push({ id: doc.id, name: doc.data().name, version: doc.data().version }); });
         }
 
-        // 【模組二：單兵數據即時監聽】
         function startStudentListener(stuId) {
             onSnapshot(doc(db, "students", stuId), (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    
-                    // 渲染基本資料與數值
                     document.getElementById('uiName').innerText = data.name || '未命名';
                     document.getElementById('uiId').innerText = `ID: ${stuId} | ${data.class || '未編編'}`;
                     document.getElementById('uiScore').innerText = data.score || 0;
-                    
                     const gold = data.gold || 0;
                     document.getElementById('uiGold').innerText = gold;
 
-                    // 檢查金幣是否足夠抽卡
                     gachaBtn.disabled = gold < DRAW_COST;
-                    if(gold < DRAW_COST) {
-                        gachaBtn.innerText = `金幣不足 (${gold}/${DRAW_COST})`;
-                    } else {
-                        gachaBtn.innerText = `啟動天工抽卡引擎`;
-                    }
+                    gachaBtn.innerText = gold < DRAW_COST ? `金幣不足 (${gold}/${DRAW_COST})` : `啟動天工抽卡引擎`;
 
-                    // 渲染背包 (目前純文字框，未來替換為 SVG)
                     const inventoryGrid = document.getElementById('inventoryGrid');
                     const cards = data.cards || [];
                     document.getElementById('cardCount').innerText = cards.length;
@@ -198,10 +152,14 @@
                     if(cards.length === 0) {
                         inventoryGrid.innerHTML = `<div style="color:#888; grid-column: 1 / -1; font-size:14px;">目前背包空空如也。</div>`;
                     } else {
-                        // 反轉陣列，讓最新抽到的卡排在前面
                         [...cards].reverse().forEach(card => {
+                            const statusHTML = card.redeemed 
+                                ? `<span class="status-badge status-redeemed">已領取</span>`
+                                : `<span class="status-badge status-pending">待兌換</span>`;
+                                
                             inventoryGrid.innerHTML += `
                                 <div class="card-placeholder">
+                                    ${statusHTML}
                                     <div class="card-name">${card.name}</div>
                                     <div><span class="card-version">${card.version}</span></div>
                                 </div>
@@ -212,39 +170,33 @@
             });
         }
 
-        // 【模組三：雲端抽卡引擎】
         gachaBtn.addEventListener('click', async () => {
-            if (!currentStudentId || gachaPool.length === 0) {
-                pullResult.style.color = "#e74c3c";
-                pullResult.innerText = "卡池異常，請稍後再試。";
-                return;
-            }
-
-            // 按鈕防抖機制
+            if (!currentStudentId || gachaPool.length === 0) return;
             gachaBtn.disabled = true;
-            pullResult.style.color = "#fff";
-            pullResult.innerText = "🌀 虛空引擎運轉中...";
+            pullResult.style.color = "#fff"; pullResult.innerText = "🌀 虛空引擎運轉中...";
 
             try {
-                // 1. 抽卡演算法 (從卡池陣列中隨機抽取一個物件)
                 const randomIndex = Math.floor(Math.random() * gachaPool.length);
-                const pulledCard = gachaPool[randomIndex];
+                const baseCard = gachaPool[randomIndex];
 
-                // 2. 寫入資料庫：扣除金幣，並將新卡牌「附加」到學生的 cards 陣列中
-                const studentRef = doc(db, "students", currentStudentId);
-                await updateDoc(studentRef, {
-                    gold: increment(-DRAW_COST), // 扣 50 金幣
-                    cards: arrayUnion(pulledCard) // 將整張卡牌物件塞入陣列
+                // 【核心修正】: 注入唯一軍籍編號 (instanceId) 與未核銷狀態 (redeemed: false)
+                const pulledCard = {
+                    ...baseCard,
+                    instanceId: Date.now().toString() + Math.floor(Math.random()*1000),
+                    redeemed: false,
+                    drawTime: new Date().toLocaleString()
+                };
+
+                await updateDoc(doc(db, "students", currentStudentId), {
+                    gold: increment(-DRAW_COST),
+                    cards: arrayUnion(pulledCard)
                 });
 
-                // 3. 廣播結果
                 pullResult.style.color = "#00ffcc";
-                pullResult.innerText = `✨ 恭喜獲得：【${pulledCard.name}】！`;
-
+                pullResult.innerText = `✨ 恭喜獲得：【${pulledCard.name}】！ (請向指揮官兌換實體卡)`;
             } catch(e) {
                 console.error("抽卡失敗:", e);
-                pullResult.style.color = "#e74c3c";
-                pullResult.innerText = "抽卡失敗，請回報指揮官。";
+                pullResult.style.color = "#e74c3c"; pullResult.innerText = "抽卡失敗，請回報指揮官。";
                 gachaBtn.disabled = false;
             }
         });
