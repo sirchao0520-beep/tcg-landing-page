@@ -144,9 +144,14 @@
         }
 
         // 單兵加扣分 (極速觸發，無確認)
+        // 單兵加扣分 (極速觸發，無確認)
         window.updateScore = async function(id, val) {
             try {
-                await updateDoc(doc(db, "students", id), { score: increment(val) });
+                // 【核心升級】：科代表加分時，同樣觸發 1:10 金幣連動
+                await updateDoc(doc(db, "students", id), { 
+                    score: increment(val),
+                    gold: increment(val * 10) 
+                });
             } catch(e) { console.error("操作失敗", e); }
         };
 
@@ -154,7 +159,6 @@
         batchAddBtn.addEventListener('click', async () => {
             if (currentClassStudents.length === 0) return;
             
-            // 由於效能考量，按鈕加上短暫的防抖(Debounce)機制，避免連點
             batchAddBtn.disabled = true;
             batchAddBtn.innerText = "⚡ 增益發射中...";
 
@@ -162,18 +166,21 @@
                 const batch = writeBatch(db);
                 currentClassStudents.forEach(student => {
                     const studentRef = doc(db, "students", student.id);
-                    batch.update(studentRef, { score: increment(1) });
+                    // 【核心升級】：全班增益時，每人 +1 分並 +10 金幣
+                    batch.update(studentRef, { 
+                        score: increment(1),
+                        gold: increment(10)
+                    });
                 });
-                await batch.commit(); // 一次性提交全班數據
+                await batch.commit(); 
             } catch(e) {
                 console.error("全班加分失敗", e);
                 alert("網路異常，增益發放失敗！");
             } finally {
-                // 恢復按鈕狀態
                 setTimeout(() => {
                     batchAddBtn.disabled = false;
                     batchAddBtn.innerText = "⚡ 發動：全班 +1 積分";
-                }, 500); // 0.5秒冷卻時間
+                }, 500); 
             }
         });
     </script>
