@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六年制語文 TCG - 科代表終端</title>
+    <style>
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        /* 頂部控制列 */
+        .header-panel { background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #3498db; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
+        h1 { color: #3498db; margin: 0; font-size: 22px; display: flex; justify-content: space-between; align-items: center; }
+        
+        select.class-filter { background: #2a2a2a; color: #3498db; border: 1px solid #3498db; padding: 8px 12px; font-size: 16px; border-radius: 4px; cursor: pointer; width: 100%; }
+        
+        /* 全班技能按鈕 */
+        .aoe-btn { background: #e67e22; color: #fff; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; transition: 0.1s; }
+        .aoe-btn:active { transform: scale(0.98); background: #d35400; }
+
+        /* 學生卡片式列表 (針對平板/手機優化) */
+        .student-list { display: flex; flex-direction: column; gap: 10px; }
+        .student-card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .stu-info { display: flex; flex-direction: column; }
+        .stu-name { font-size: 18px; font-weight: bold; color: #fff; }
+        .stu-id { font-size: 12px; color: #888; }
+        .stu-score { font-size: 24px; font-weight: bold; color: #f39c12; margin: 0 15px; min-width: 50px; text-align: center; }
+        
+        /* 戰術按鈕組 (加大點擊範圍) */
+        .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; flex: 1; max-width: 250px; }
+        .action-btn { border: none; padding: 10px 0; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.1s; }
+        .action-btn:active { transform: scale(0.95); filter: brightness(0.8); }
+        
+        .btn-p1 { background: #2ecc71; color: #121212; }
+        .btn-p2 { background: #27ae60; color: #fff; }
+        .btn-p5 { background: #1abc9c; color: #121212; }
+        .btn-m1 { background: #e74c3c; color: #fff; }
+
+        /* 隱藏無關元素 */
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-panel">
+            <h1>
+                前線科代表戰術終端
+                <span id="totalCount" style="font-size: 14px; color: #aaa;">載入中...</span>
+            </h1>
+            
+            <select id="classSelect" class="class-filter">
+                <option value="" disabled selected>請選擇您管理的編制...</option>
+                <option value="A班">A班 陣地</option>
+                <option value="B班">B班 陣地</option>
+                <option value="C班">C班 陣地</option>
+            </select>
+
+            <button id="batchAddBtn" class="aoe-btn hidden">⚡ 發動：全班 +1 積分</button>
+        </div>
+
+        <div id="studentList" class="student-list">
+            <div style="text-align: center; color: #666; padding: 20px;">請先由上方選擇班級，以展開部隊名單。</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, doc, updateDoc, writeBatch, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        // ⚠️ 替換為您的 Firebase 金鑰
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZ7b0hjgkTMUTTNRDAjkcAMR374BH1c-o",
+            authDomain: "language-tcg-db.firebaseapp.com",
+            projectId: "language-tcg-db",
+            storageBucket: "language-tcg-db.firebasestorage.app",
+            messagingSenderId: "517995107179",
+            appId: "1:517995107179:web:b326458b66991b97f2322e"
+        };
+        // ==========================================
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        const classSelect = document.getElementById('classSelect');
+        const studentList = document.getElementById('studentList');
+        const totalCount = document.getElementById('totalCount');
+        const batchAddBtn = document.getElementById('batchAddBtn');
+        
+        let allStudentsData = []; // 暫存雲端所有學生
+        let currentClassStudents = []; // 當前畫面上顯示的該班學生
+
+        // 全量監聽 (小助手端僅讀取並渲染其所屬班級)
+        onSnapshot(collection(db, "students"), (snapshot) => {
+            allStudentsData = [];
+            snapshot.forEach((doc) => { allStudentsData.push({ id: doc.id, ...doc.data() }); });
+            renderClass(); // 若已選擇班級，則觸發畫面更新
+        });
+
+        // 班級切換監聽
+        classSelect.addEventListener('change', () => {
+            batchAddBtn.classList.remove('hidden'); // 顯示全班按鈕
+            renderClass();
+        });
+
+        // 渲染專屬班級名單
+        function renderClass() {
+            const targetClass = classSelect.value;
+            if (!targetClass) return;
+
+            studentList.innerHTML = '';
+            
+            // 過濾並排序
+            currentClassStudents = allStudentsData.filter(s => s.class === targetClass);
+            currentClassStudents.sort((a, b) => a.id.localeCompare(b.id));
+
+            totalCount.innerText = `實到兵力: ${currentClassStudents.length} 員`;
+
+            if (currentClassStudents.length === 0) {
+                studentList.innerHTML = `<div style="text-align: center; color: #888;">該編制目前無兵力數據。</div>`;
+                return;
+            }
+
+            currentClassStudents.forEach((data) => {
+                studentList.innerHTML += `
+                    <div class="student-card">
+                        <div class="stu-info">
+                            <span class="stu-name">${data.name || '未命名'}</span>
+                            <span class="stu-id">${data.id}</span>
+                        </div>
+                        <div class="stu-score">${data.score || 0}</div>
+                        <div class="btn-group">
+                            <button class="action-btn btn-p1" onclick="updateScore('${data.id}', 1)">+1</button>
+                            <button class="action-btn btn-p2" onclick="updateScore('${data.id}', 2)">+2</button>
+                            <button class="action-btn btn-p5" onclick="updateScore('${data.id}', 5)">+5</button>
+                            <button class="action-btn btn-m1" onclick="updateScore('${data.id}', -1)">-1</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 單兵加扣分 (極速觸發，無確認)
+        window.updateScore = async function(id, val) {
+            try {
+                await updateDoc(doc(db, "students", id), { score: increment(val) });
+            } catch(e) { console.error("操作失敗", e); }
+        };
+
+        // 全班 AOE 加分 (使用 Batch Write 確保同時更新且效能最高)
+        batchAddBtn.addEventListener('click', async () => {
+            if (currentClassStudents.length === 0) return;
+            
+            // 由於效能考量，按鈕加上短暫的防抖(Debounce)機制，避免連點
+            batchAddBtn.disabled = true;
+            batchAddBtn.innerText = "⚡ 增益發射中...";
+
+            try {
+                const batch = writeBatch(db);
+                currentClassStudents.forEach(student => {
+                    const studentRef = doc(db, "students", student.id);
+                    batch.update(studentRef, { score: increment(1) });
+                });
+                await batch.commit(); // 一次性提交全班數據
+            } catch(e) {
+                console.error("全班加分失敗", e);
+                alert("網路異常，增益發放失敗！");
+            } finally {
+                // 恢復按鈕狀態
+                setTimeout(() => {
+                    batchAddBtn.disabled = false;
+                    batchAddBtn.innerText = "⚡ 發動：全班 +1 積分";
+                }, 500); // 0.5秒冷卻時間
+            }
+        });
+    </script>
+</body>
+</html>
