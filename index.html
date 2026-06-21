@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六年制語文 TCG - 總指揮樞紐</title>
+    <style>
+        body { background-color: #0a0a0a; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #0a0a0a 70%); }
+        .container { max-width: 900px; width: 90%; text-align: center; }
+        
+        h1 { color: #00ffcc; font-size: 32px; letter-spacing: 2px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(0, 255, 204, 0.3); }
+        p.subtitle { color: #888; margin-bottom: 40px; font-size: 16px; letter-spacing: 1px; }
+
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+        
+        /* 樞紐通道卡片 */
+        .nav-card { text-decoration: none; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; border-radius: 12px; border: 1px solid #333; background: #121212; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .nav-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        
+        /* 視覺特效光暈 */
+        .nav-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; }
+        .card-admin::before { background: #f39c12; box-shadow: 0 0 15px #f39c12; }
+        .card-admin:hover { border-color: #f39c12; }
+        .card-assistant::before { background: #3498db; box-shadow: 0 0 15px #3498db; }
+        .card-assistant:hover { border-color: #3498db; }
+        .card-student::before { background: #9b59b6; box-shadow: 0 0 15px #9b59b6; }
+        .card-student:hover { border-color: #9b59b6; }
+
+        .icon { font-size: 48px; margin-bottom: 15px; }
+        .title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #fff; }
+        .desc { font-size: 13px; color: #aaa; line-height: 1.5; }
+
+        /* 系統狀態條 */
+        .system-status { margin-top: 50px; padding: 10px 20px; background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 50px; display: inline-flex; align-items: center; gap: 10px; font-size: 12px; color: #00ffcc; }
+        .blink { width: 8px; height: 8px; background: #00ffcc; border-radius: 50%; animation: blinker 1.5s linear infinite; box-shadow: 0 0 8px #00ffcc; }
+        @keyframes blinker { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>六年制語文 TCG 系統</h1>
+        <p class="subtitle">天工督軍 - 跨星際戰略指揮樞紐</p>
+
+        <div class="nav-grid">
+            <a href="admin.html" class="nav-card card-admin">
+                <div class="icon">👑</div>
+                <div class="title">最高中控台</div>
+                <div class="desc">主公專屬。統籌兵籍、發放軍餉、紀律處分與兵器庫卡牌鑄造模組。</div>
+            </a>
+
+            <a href="assistant.html" class="nav-card card-assistant">
+                <div class="icon">⚔️</div>
+                <div class="title">將領前線終端</div>
+                <div class="desc">科代表專屬。獨立班級視角，極速單兵/全班增益控制台。</div>
+            </a>
+
+            <a href="student.html" class="nav-card card-student">
+                <div class="icon">🛡️</div>
+                <div class="title">士兵裝備總署</div>
+                <div class="desc">學生專屬。兵籍登入、任務備忘錄查閱，與天工抽卡引擎入口。</div>
+            </a>
+        </div>
+
+        <div class="system-status">
+            <div class="blink"></div>
+            伺服器連線正常 | Firebase 數據樞紐運轉中
+        </div>
+    </div>
+
+</body>
+</html>
