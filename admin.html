@@ -8,26 +8,29 @@
         /* 全局與佈局 */
         body { background-color: #f4f6f9; color: #333; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; font-size: 16px; }
         
-        /* ======== 左側常駐導航列 (Sidebar) ======== */
+        /* ======== 左側常駐導航列 ======== */
         .sidebar { width: 250px; background: #1a1e29; color: #fff; display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.1); z-index: 10; }
         .sidebar-header { padding: 20px; font-size: 20px; font-weight: bold; border-bottom: 1px solid #2c3245; display: flex; align-items: center; gap: 10px; color: #00ffcc; }
         .nav-item { padding: 15px 20px; color: #a0aabf; text-decoration: none; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; font-size: 16px; }
         .nav-item:hover { background: #232838; color: #fff; }
         .nav-item.active { background: #2a3042; color: #fff; border-left-color: #00ffcc; font-weight: bold; }
         .nav-divider { height: 1px; background: #2c3245; margin: 15px 0; }
-        .nav-external { color: #f39c12; }
 
         /* ======== 右側主內容區 ======== */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background: #f4f6f9; }
-        .topbar { background: #fff; padding: 15px 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f4f6f9; }
+        .topbar { background: #fff; padding: 15px 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 5; height: 35px; }
         .topbar h1 { margin: 0; font-size: 24px; color: #2c3e50; }
         
         select.class-filter { background: #fff; color: #3498db; border: 2px solid #3498db; padding: 8px 15px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         
         /* 頁籤切換邏輯 */
-        .tab-content { display: none; padding: 20px 30px; }
+        .tab-content { display: none; padding: 20px 30px; height: calc(100vh - 65px); overflow-y: auto; box-sizing: border-box; }
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 內嵌框架專用樣式 */
+        .tab-iframe { padding: 0; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; background: #121212; }
 
         /* 面板與卡片 */
         .grid-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
@@ -38,38 +41,34 @@
         input, textarea, select { background: #f8f9fa; color: #333; border: 1px solid #ddd; padding: 10px; border-radius: 6px; width: calc(100% - 22px); margin-bottom: 10px; font-size: 16px; }
         textarea { height: 60px; resize: none; }
         input:focus, textarea:focus, select:focus { border-color: #3498db; outline: none; background: #fff; }
-        
         button.action-primary { background: #3498db; color: #fff; border: none; padding: 10px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; transition: 0.2s; }
         button.action-primary:hover { background: #2980b9; }
 
-        /* 數據表格 (字體放大，適應淺色主題) */
+        /* 數據表格 */
         table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-top: 10px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 18px; /* 字體放大 */ }
-        th { background-color: #f8f9fa; color: #2c3e50; font-weight: bold; font-size: 16px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 16px; }
+        th { background-color: #f8f9fa; color: #2c3e50; font-weight: bold; font-size: 15px; white-space: nowrap; }
         tr:hover { background-color: #f1f4f8; }
         
-        /* 戰術按鈕群 (重現實用按鈕) */
-        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .btn-sm { padding: 6px 12px; font-size: 16px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; transition: 0.1s; }
+        /* 戰術按鈕群 */
+        .btn-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        .btn-sm { padding: 6px 10px; font-size: 15px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; transition: 0.1s; }
         .btn-sm:active { transform: scale(0.95); }
-        
         .btn-p1 { background: #2ecc71; color: #fff; } .btn-p2 { background: #27ae60; color: #fff; } .btn-p5 { background: #1abc9c; color: #fff; }
         .btn-m1 { background: #e74c3c; color: #fff; }
         .btn-hw { background: #f39c12; color: #fff; } .btn-leave { background: #16a085; color: #fff; }
-        
         .btn-delete-mini { background: transparent; color: #e74c3c; border: none; padding: 4px 8px; cursor: pointer; border-radius: 4px; font-size: 16px; font-weight: bold; } 
         .btn-delete-mini:hover { background: #fee; }
         
-        /* 卡牌與軍需專屬 UI */
         .redeem-select { width: 150px; font-size: 14px; margin-bottom: 0; padding: 6px; display: inline-block; }
         .btn-redeem { background: #9b59b6; color: #fff; padding: 6px 15px; font-size: 14px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; }
         .card-tag { display: inline-block; background: #f0f3f5; border: 1px solid #dcdde1; padding: 2px 8px; border-radius: 12px; font-size: 12px; color: #7f8fa6; margin: 2px; }
-        
-        /* 標籤 */
         .stat-val { font-size: 20px; font-weight: bold; }
         .score-color { color: #2980b9; } .gold-color { color: #f39c12; }
+        .stat-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 12px; background: #eee; color: #555; margin-bottom: 2px; }
+        .warn-text { background: #fee; color: #e74c3c; border: 1px solid #fcc; }
         
-        /* 彈出視窗 (僅保留給功課紀錄) */
+        /* 彈出視窗 */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); }
         .modal-content { background-color: #fff; margin: 5% auto; padding: 25px; border-radius: 10px; width: 80%; max-width: 600px; color: #333; max-height: 80vh; overflow-y: auto; }
         .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
@@ -87,13 +86,13 @@
         
         <div class="nav-divider"></div>
         
-        <a href="assistant.html" target="_blank" class="nav-item nav-external">🛡️ 小助手指揮所 ↗</a>
-        <a href="student.html" target="_blank" class="nav-item nav-external">⚔️ 士兵裝備登入 ↗</a>
+        <div class="nav-item" onclick="switchTab('tabAssistant', this)">🛡️ 小助手指揮所</div>
+        <div class="nav-item" onclick="switchTab('tabStudent', this)">⚔️ 士兵裝備登入</div>
     </aside>
 
     <main class="main-content">
         <div class="topbar">
-            <h1 id="pageTitle">🦅 統御台 - 兵籍與軍紀</h1>
+            <h1 id="pageTitle">🦅 統御台 (大政維新)</h1>
             <select id="viewClassFilter" class="class-filter">
                 <option value="ALL">顯示全部兵力</option>
                 <option value="A班">A班</option>
@@ -120,9 +119,18 @@
                     <button id="addBtn" class="action-primary" style="margin-top: 10px;">建檔 / 更新</button>
                 </div>
             </div>
-
             <table>
-                <thead><tr><th>學號</th><th>姓名</th><th>班級</th><th>可用金幣 / 積分</th><th>戰術決策面板</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>學號</th>
+                        <th>姓名</th>
+                        <th>班級</th>
+                        <th>積分</th>
+                        <th>金幣</th>
+                        <th>狀態紀錄</th>
+                        <th>戰術決策面板</th>
+                    </tr>
+                </thead>
                 <tbody id="troopTableBody"></tbody>
             </table>
         </div>
@@ -136,15 +144,21 @@
                 </div>
                 <div class="form-box purple">
                     <h3>🔍 兵器庫現有模版預覽</h3>
-                    <div id="cardPreviewBox" style="height: 100px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 6px; font-size: 14px;">
-                        </div>
+                    <div id="cardPreviewBox" style="height: 100px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 6px; font-size: 14px;"></div>
                 </div>
             </div>
-
             <table>
                 <thead><tr><th>學號/姓名</th><th>🎒 未換卡牌 (待發放實體)</th><th>📚 兌換歷史 (已結案)</th></tr></thead>
                 <tbody id="inventoryTableBody"></tbody>
             </table>
+        </div>
+
+        <div id="tabAssistant" class="tab-content tab-iframe">
+            <iframe src="assistant.html"></iframe>
+        </div>
+
+        <div id="tabStudent" class="tab-content tab-iframe">
+            <iframe src="student.html"></iframe>
         </div>
     </main>
 
@@ -152,7 +166,6 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('disciplineModal')">&times;</span>
             <h2 id="discModalTitle" style="color:#2c3e50; margin-top:0;">功課紀律追蹤面板</h2>
-            
             <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
                 <input type="text" id="hwTitleInput" placeholder="輸入作業名稱 (例如：第十課抄寫)" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" />
                 <div style="display: flex; gap: 10px;">
@@ -160,10 +173,8 @@
                     <button class="btn-sm btn-leave" onclick="addAssignment('leave')" style="flex:1; padding:10px;">登記請假 (免扣)</button>
                 </div>
             </div>
-
             <h4 style="color:#e74c3c; margin-bottom:5px;">🚨 待補交清單</h4>
             <div id="pendingHwList"></div>
-
             <h4 style="color:#2ecc71; margin-top:20px; margin-bottom:5px;">✅ 已補交/結案</h4>
             <div id="resolvedHwList"></div>
         </div>
@@ -193,16 +204,18 @@
         let allStudentsData = [];
         let allCardsData = [];
 
-        // UI 切換邏輯 (SPA 核心)
         window.switchTab = function(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             element.classList.add('active');
-            document.getElementById('pageTitle').innerText = element.innerText.replace(' ↗', '');
+            document.getElementById('pageTitle').innerText = element.innerText;
+            
+            const filter = document.getElementById('viewClassFilter');
+            if(tabId === 'tabTroops' || tabId === 'tabInventory') filter.style.display = 'block';
+            else filter.style.display = 'none';
         };
 
-        // 資料庫監聽與過濾
         const viewClassFilter = document.getElementById('viewClassFilter');
         viewClassFilter.addEventListener('change', renderAllTables);
 
@@ -221,7 +234,6 @@
             });
         });
 
-        // 渲染雙表核心
         function renderAllTables() {
             const currentFilter = viewClassFilter.value;
             const troopBody = document.getElementById('troopTableBody');
@@ -232,18 +244,20 @@
             filteredData.sort((a, b) => (a.class || "").localeCompare(b.class || "") || a.id.localeCompare(b.id));
 
             filteredData.forEach((data) => {
-                // --- 統御台渲染 (加入按鈕) ---
                 const pendingHw = (data.assignments || []).filter(a => a.status === 'pending').length;
                 const hwAlert = pendingHw > 0 ? `<span style="color:#e74c3c; font-weight:bold;">(${pendingHw})</span>` : '';
 
+                // 【核心修正】：分開積分與金幣，並渲染狀態紀錄
                 troopBody.innerHTML += `
                     <tr>
                         <td><strong>${data.id}</strong></td>
                         <td><strong>${data.name || ''}</strong></td>
                         <td style="color:#7f8fa6;">${data.class || ''}</td>
+                        <td style="color:#2980b9; font-weight:bold; font-size:20px;">${data.score || 0}</td>
+                        <td style="color:#f39c12; font-weight:bold; font-size:20px;">${data.gold || 0}</td>
                         <td>
-                            <span class="stat-val gold-color">${data.gold || 0} 🪙</span> / 
-                            <span class="score-color">${data.score || 0} 分</span>
+                            <div class="stat-badge ${data.missingHw > 0 ? 'warn-text' : ''}">欠交: ${data.missingHw || 0}</div><br>
+                            <div class="stat-badge">請假: ${data.leaveDays || 0}</div>
                         </td>
                         <td>
                             <div class="btn-group">
@@ -259,12 +273,11 @@
                     </tr>
                 `;
 
-                // --- 背包軍需台渲染 (直接內建下拉選單核銷) ---
+                // 背包核銷渲染
                 const cards = data.cards || [];
                 const pendingCards = cards.filter(c => !c.redeemed).reverse();
                 const redeemedCards = cards.filter(c => c.redeemed).reverse();
                 
-                // 產生待核銷下拉選單
                 let pendingHTML = `<span style="color:#888; font-size:14px;">空空如也</span>`;
                 if (pendingCards.length > 0) {
                     let options = pendingCards.map(c => `<option value="${c.instanceId || `old_${c.name}`}">${c.name} (${c.version})</option>`).join('');
@@ -277,7 +290,6 @@
                     `;
                 }
 
-                // 產生已核銷標籤
                 let redeemedHTML = redeemedCards.length > 0 
                     ? redeemedCards.slice(0, 5).map(c => `<span class="card-tag">${c.name}</span>`).join('') + (redeemedCards.length > 5 ? '...' : '')
                     : `<span style="color:#ccc; font-size:12px;">尚未有兌換紀錄</span>`;
@@ -302,7 +314,6 @@
             if(confirm(`【年度重置】確定抹除兵籍「${id}」？`)) await deleteDoc(doc(db, "students", id));
         };
 
-        // 直接在表格內完成核銷
         window.quickRedeem = async function(stuId) {
             const selectEl = document.getElementById(`sel_${stuId}`);
             if(!selectEl || !selectEl.value) return alert("請先從下拉選單選擇一張卡牌！");
@@ -322,7 +333,7 @@
             } catch(e) { console.error("兌換失敗", e); }
         };
 
-        // 功課紀律 Modal 邏輯 (保持不變，直接復用)
+        // 功課紀律 Modal 邏輯 
         let currentTargetStudentId = null;
         window.closeModal = function(id) { document.getElementById(id).style.display = "none"; currentTargetStudentId = null; };
         
